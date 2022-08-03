@@ -55,7 +55,7 @@ pub mod pallet {
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
-    pub struct Pallet<T>(_);
+    pub struct Pallet<T>(PhantomData<T>);
 
     // The pallet's runtime storage items.
     // https://docs.substrate.io/v3/runtime/storage
@@ -93,6 +93,26 @@ pub mod pallet {
             T::AccountId,
             Option<BoundedVec<u8, T::MaxDefaultStringLength>>,
         ),
+        UpdatedTwitter(
+            T::AccountId,
+            Option<BoundedVec<u8, T::MaxDefaultStringLength>>,
+        ),
+        UpdatedFacebook(
+            T::AccountId,
+            Option<BoundedVec<u8, T::MaxDefaultStringLength>>,
+        ),
+        UpdatedInstagram(
+            T::AccountId,
+            Option<BoundedVec<u8, T::MaxDefaultStringLength>>,
+        ),
+        UpdatedSpotify(
+            T::AccountId,
+            Option<BoundedVec<u8, T::MaxDefaultStringLength>>,
+        ),
+        UpdatedAppleMusic(
+            T::AccountId,
+            Option<BoundedVec<u8, T::MaxDefaultStringLength>>,
+        ),
     }
 
     // Errors inform users that something went wrong.
@@ -116,25 +136,16 @@ pub mod pallet {
             // Ensure the caller is an artist or a candidate
             ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
 
-            let new_cost: BalanceOf<T>;
+            let result = Self::to_bounded_with_cost(alias)?;
 
             // Bound the data and get the cost of the new datas
-            let bounded_alias: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = match alias {
-                Some(a) => {
-                    new_cost = Self::compute_cost(&a);
-
-                    Some(a.try_into().map_err(|_| Error::<T>::InvalidStringLength)?)
-                }
-                None => {
-                    new_cost = <BalanceOf<T>>::from(0u32);
-                    None
-                }
-            };
+            let bounded_alias: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
 
             let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
 
             let old_cost = match metadatas.alias {
-                Some(data) => Self::compute_cost(&data),
+                Some(ref data) => Self::compute_cost(&data),
                 None => <BalanceOf<T>>::from(0u32),
             };
 
@@ -160,25 +171,16 @@ pub mod pallet {
             // Ensure the caller is an artist or a candidate
             ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
 
-            let new_cost: BalanceOf<T>;
+            let result = Self::to_bounded_with_cost(bio)?;
 
             // Bound the data and get the cost of the new datas
-            let bounded_bio: Option<BoundedVec<u8, T::MaxDescriptionLength>> = match bio {
-                Some(a) => {
-                    new_cost = Self::compute_cost(&a);
-
-                    Some(a.try_into().map_err(|_| Error::<T>::InvalidStringLength)?)
-                }
-                None => {
-                    new_cost = <BalanceOf<T>>::from(0u32);
-                    None
-                }
-            };
+            let bounded_bio: Option<BoundedVec<u8, T::MaxDescriptionLength>> = result.0;
+            let new_cost = result.1;
 
             let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
 
             let old_cost = match metadatas.bio {
-                Some(data) => Self::compute_cost(&data),
+                Some(ref data) => Self::compute_cost(&data),
                 None => <BalanceOf<T>>::from(0u32),
             };
 
@@ -207,25 +209,16 @@ pub mod pallet {
             // Ensure the caller is an artist or a candidate
             ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
 
-            let new_cost: BalanceOf<T>;
+            let result = Self::to_bounded_with_cost(picture_url)?;
 
             // Bound the data and get the cost of the new datas
-            let bounded_pp: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = match picture_url {
-                Some(a) => {
-                    new_cost = Self::compute_cost(&a);
-
-                    Some(a.try_into().map_err(|_| Error::<T>::InvalidStringLength)?)
-                }
-                None => {
-                    new_cost = <BalanceOf<T>>::from(0u32);
-                    None
-                }
-            };
+            let bounded_pp: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
 
             let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
 
             let old_cost = match metadatas.profile_pic {
-                Some(data) => Self::compute_cost(&data),
+                Some(ref data) => Self::compute_cost(&data),
                 None => <BalanceOf<T>>::from(0u32),
             };
 
@@ -240,6 +233,187 @@ pub mod pallet {
             <ArtistMetadatas<T>>::insert(caller.clone(), metadatas);
 
             Self::deposit_event(Event::<T>::UpdatedProfilePic(caller, bounded_pp));
+
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_twitter(origin: OriginFor<T>, username: Option<Vec<u8>>) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+
+            // Ensure the caller is an artist or a candidate
+            ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
+
+            let result = Self::to_bounded_with_cost(username)?;
+
+            // Bound the data and get the cost of the new datas
+            let bounded_username: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
+
+            let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
+
+            let old_cost = match metadatas.twitter {
+                Some(ref data) => Self::compute_cost(&data),
+                None => <BalanceOf<T>>::from(0u32),
+            };
+
+            if new_cost > old_cost {
+                T::Currency::reserve(&caller, new_cost - old_cost)?;
+            }
+            if old_cost > new_cost {
+                T::Currency::unreserve(&caller, old_cost - new_cost);
+            }
+
+            metadatas.profile_pic = bounded_username.clone();
+            <ArtistMetadatas<T>>::insert(caller.clone(), metadatas);
+
+            Self::deposit_event(Event::<T>::UpdatedTwitter(caller, bounded_username));
+
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_facebook(
+            origin: OriginFor<T>,
+            profile_url: Option<Vec<u8>>,
+        ) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+
+            // Ensure the caller is an artist or a candidate
+            ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
+
+            let result = Self::to_bounded_with_cost(profile_url)?;
+
+            // Bound the data and get the cost of the new datas
+            let bounded_url: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
+
+            let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
+
+            let old_cost = match metadatas.fb {
+                Some(ref data) => Self::compute_cost(&data),
+                None => <BalanceOf<T>>::from(0u32),
+            };
+
+            if new_cost > old_cost {
+                T::Currency::reserve(&caller, new_cost - old_cost)?;
+            }
+            if old_cost > new_cost {
+                T::Currency::unreserve(&caller, old_cost - new_cost);
+            }
+
+            metadatas.profile_pic = bounded_url.clone();
+            <ArtistMetadatas<T>>::insert(caller.clone(), metadatas);
+
+            Self::deposit_event(Event::<T>::UpdatedFacebook(caller, bounded_url));
+
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_instagram(origin: OriginFor<T>, username: Option<Vec<u8>>) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+
+            // Ensure the caller is an artist or a candidate
+            ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
+
+            let result = Self::to_bounded_with_cost(username)?;
+
+            // Bound the data and get the cost of the new datas
+            let bounded_username: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
+
+            let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
+
+            let old_cost = match metadatas.instagram {
+                Some(ref data) => Self::compute_cost(&data),
+                None => <BalanceOf<T>>::from(0u32),
+            };
+
+            if new_cost > old_cost {
+                T::Currency::reserve(&caller, new_cost - old_cost)?;
+            }
+            if old_cost > new_cost {
+                T::Currency::unreserve(&caller, old_cost - new_cost);
+            }
+
+            metadatas.profile_pic = bounded_username.clone();
+            <ArtistMetadatas<T>>::insert(caller.clone(), metadatas);
+
+            Self::deposit_event(Event::<T>::UpdatedInstagram(caller, bounded_username));
+
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_spotify(origin: OriginFor<T>, artist_id: Option<Vec<u8>>) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+
+            // Ensure the caller is an artist or a candidate
+            ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
+
+            let result = Self::to_bounded_with_cost(artist_id)?;
+
+            // Bound the data and get the cost of the new datas
+            let bounded_id: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
+
+            let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
+
+            let old_cost = match metadatas.spotify {
+                Some(ref data) => Self::compute_cost(&data),
+                None => <BalanceOf<T>>::from(0u32),
+            };
+
+            if new_cost > old_cost {
+                T::Currency::reserve(&caller, new_cost - old_cost)?;
+            }
+            if old_cost > new_cost {
+                T::Currency::unreserve(&caller, old_cost - new_cost);
+            }
+
+            metadatas.profile_pic = bounded_id.clone();
+            <ArtistMetadatas<T>>::insert(caller.clone(), metadatas);
+
+            Self::deposit_event(Event::<T>::UpdatedSpotify(caller, bounded_id));
+
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_apple_music(
+            origin: OriginFor<T>,
+            username: Option<Vec<u8>>,
+        ) -> DispatchResult {
+            let caller = ensure_signed(origin)?;
+
+            // Ensure the caller is an artist or a candidate
+            ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
+
+            let result = Self::to_bounded_with_cost(username)?;
+
+            // Bound the data and get the cost of the new datas
+            let bounded_username: Option<BoundedVec<u8, T::MaxDefaultStringLength>> = result.0;
+            let new_cost = result.1;
+
+            let mut metadatas = <ArtistMetadatas<T>>::get(&caller);
+
+            let old_cost = match metadatas.apple_music {
+                Some(ref data) => Self::compute_cost(data),
+                None => <BalanceOf<T>>::from(0u32),
+            };
+
+            if new_cost > old_cost {
+                T::Currency::reserve(&caller, new_cost - old_cost)?;
+            }
+            if old_cost > new_cost {
+                T::Currency::unreserve(&caller, old_cost - new_cost);
+            }
+
+            metadatas.profile_pic = bounded_username.clone();
+            <ArtistMetadatas<T>>::insert(caller.clone(), metadatas);
+
+            Self::deposit_event(Event::<T>::UpdatedAppleMusic(caller, bounded_username));
 
             Ok(())
         }
