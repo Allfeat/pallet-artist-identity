@@ -11,19 +11,46 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+mod functions;
+mod types;
+use types::*;
+
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+use frame_support::{
+    pallet_prelude::*,
+    traits::{Contains, Currency},
+};
+use frame_system::pallet_prelude::*;
+
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::pallet_prelude::*;
-    use frame_system::pallet_prelude::*;
+    use frame_support::traits::ReservableCurrency;
+
+    use super::*;
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+        /// Used to pay the data stored.
+        type Currency: ReservableCurrency<Self::AccountId>;
+
+        /// The storage containing the artists/candidates.
+        type Artists: Contains<Self::AccountId>;
+
+        /// The cost of storing one byte of data.
+        #[pallet::constant]
+        type CostPerByte: Get<BalanceOf<Self>>;
+
+        #[pallet::constant]
+        type MaxDefaultStringLength: Get<u32>;
+
+        #[pallet::constant]
+        type MaxDescriptionLength: Get<u32>;
     }
 
     #[pallet::pallet]
@@ -33,10 +60,19 @@ pub mod pallet {
     // The pallet's runtime storage items.
     // https://docs.substrate.io/v3/runtime/storage
     #[pallet::storage]
-    #[pallet::getter(fn something)]
-    // Learn more about declaring storage items:
-    // https://docs.substrate.io/v3/runtime/storage#declaring-storage-items
-    pub type Something<T> = StorageValue<_, u32>;
+    #[pallet::getter(fn get_artist_metadata)]
+    pub type ArtistMetadata<T: Config> = StorageMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Metadata<
+            BoundedVec<u8, T::MaxDefaultStringLength>,
+            BoundedVec<u8, T::MaxDescriptionLength>,
+            BoundedVec<u8, T::MaxDefaultStringLength>,
+            BoundedVec<u8, T::MaxDefaultStringLength>,
+        >,
+        ValueQuery,
+    >;
 
     // Pallets use events to inform users when important changes are made.
     // https://docs.substrate.io/v3/runtime/events-and-errors
@@ -45,58 +81,75 @@ pub mod pallet {
     pub enum Event<T: Config> {
         /// Event documentation should end with an array that provides descriptive names for event
         /// parameters. [something, who]
-        SomethingStored(u32, T::AccountId),
+        UpdatedMetadata(T::AccountId, Option<Vec<u8>>),
     }
 
     // Errors inform users that something went wrong.
     #[pallet::error]
     pub enum Error<T> {
-        /// Error names should be descriptive.
-        NoneValue,
-        /// Errors should have helpful documentation associated with them.
-        StorageOverflow,
+        /// The caller is not an artist or a candidate (not enough privileges).
+        NotArtistOrCandidate,
+        /// This given string doesn't have a valid length.
+        InvalidStringLength,
     }
 
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
-    // These functions materialize as "extrinsics", which are often compared to transactions.
+    // These functions materialize as "extrinsic", which are often compared to transactions.
     // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// An example dispatchable that takes a singles value as a parameter, writes the value to
-        /// storage and emits an event. This function must be dispatched by a signed extrinsic.
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-        pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
-            // Check that the extrinsic was signed and get the signer.
-            // This function will return an error if the extrinsic is not signed.
-            // https://docs.substrate.io/v3/runtime/origins
-            let who = ensure_signed(origin)?;
-
-            // Update storage.
-            <Something<T>>::put(something);
-
-            // Emit an event.
-            Self::deposit_event(Event::SomethingStored(something, who));
-            // Return a successful DispatchResultWithPostInfo
+        #[pallet::weight(0)]
+        pub fn update_alias(origin: OriginFor<T>, alias: Option<Vec<u8>>) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, alias)?;
             Ok(())
         }
 
-        /// An example dispatchable that may throw a custom error.
-        #[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-        pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_signed(origin)?;
+        #[pallet::weight(0)]
+        pub fn update_bio(origin: OriginFor<T>, bio: Option<Vec<u8>>) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, bio)?;
+            Ok(())
+        }
 
-            // Read a value from storage.
-            match <Something<T>>::get() {
-                // Return an error if the value has not been set.
-                None => return Err(Error::<T>::NoneValue.into()),
-                Some(old) => {
-                    // Increment the value read from storage; will error in the event of overflow.
-                    let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-                    // Update the value in storage with the incremented result.
-                    <Something<T>>::put(new);
-                    Ok(())
-                }
-            }
+        #[pallet::weight(0)]
+        pub fn update_profile_picture(
+            origin: OriginFor<T>,
+            url: Option<Vec<u8>>,
+        ) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, url)?;
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_twitter(origin: OriginFor<T>, username: Option<Vec<u8>>) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, username)?;
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_facebook(origin: OriginFor<T>, url: Option<Vec<u8>>) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, url)?;
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_instagram(origin: OriginFor<T>, username: Option<Vec<u8>>) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, username)?;
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_spotify(origin: OriginFor<T>, artist_id: Option<Vec<u8>>) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, artist_id)?;
+            Ok(())
+        }
+
+        #[pallet::weight(0)]
+        pub fn update_apple_music(
+            origin: OriginFor<T>,
+            username: Option<Vec<u8>>,
+        ) -> DispatchResult {
+            Self::update_field(origin, FieldName::Alias, username)?;
+            Ok(())
         }
     }
 }

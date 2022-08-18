@@ -1,13 +1,13 @@
 [package]
-name = "pallet-template"
+name = "pallet-artist-identity"
 version = "0.1.0-dev"
-description = "FRAME pallet template adapted to build on the Allfeat blockchain."
-authors = ["Allfeat <https://github.com/paritytech>"]
+description = "Pallet storing the logic to store Allfeat artists metadata"
+authors = ["Allfeat <https://github.com/All-feat>"]
 homepage = "https://allfeat.com/"
 edition = "2021"
 license = "Unlicense"
 publish = false
-repository = "https://github.com/paritytech/pallet-template"
+repository = "https://github.com/All-feat/pallet-artist-identity"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -28,6 +28,8 @@ sp-core = { default-features = false, version = "6.0.0", git = "https://github.c
 sp-io = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
 sp-runtime = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
 pallet-collective = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
+pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
+pallet-artists = { version = "1.0.0-dev", default-features = false, git = "ssh://git@github.com/All-feat/pallet-artists.git", branch = "develop" }
 
 [features]
 default = ["std"]
@@ -37,6 +39,9 @@ std = [
   "frame-support/std",
   "frame-system/std",
   "frame-benchmarking/std",
+  "pallet-collective/std",
+  "pallet-balances/std",
+  "pallet-artists/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
