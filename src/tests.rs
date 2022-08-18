@@ -18,6 +18,9 @@ mod fields_test {
                 Some(alias) => Some(alias.into()),
                 None => None,
             };
+            let expected_cost = ALICE.alias.unwrap().len() as u64 * mock::CostPerByte::get();
+
+            let balance_before = Balances::free_balance(ALICE.account_id);
 
             // None should be returned as the artist have never set an alias
             let mut current_metadata = ArtistIdentity::get_artist_metadata(ALICE.account_id);
@@ -34,6 +37,7 @@ mod fields_test {
                 alice_alias.clone().try_into().unwrap(),
             ));
 
+            let new_balance = Balances::free_balance(ALICE.account_id);
             current_metadata = ArtistIdentity::get_artist_metadata(ALICE.account_id);
 
             let unbounded_current_alias: Option<Vec<u8>> = if current_metadata.alias.len() > 0 {
@@ -42,6 +46,7 @@ mod fields_test {
                 None
             };
 
+            assert_eq!(new_balance, balance_before - expected_cost);
             assert_eq!(unbounded_current_alias, alice_alias);
         })
     }
