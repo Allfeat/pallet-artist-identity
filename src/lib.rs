@@ -3,7 +3,6 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://docs.substrate.io/v3/runtime/frame>
-pub use pallet::*;
 
 #[cfg(test)]
 mod mock;
@@ -23,6 +22,8 @@ use frame_support::{
     traits::{Contains, Currency},
 };
 use frame_system::pallet_prelude::*;
+pub use pallet::*;
+use sp_std::prelude::*;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -55,7 +56,7 @@ pub mod pallet {
 
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
-    pub struct Pallet<T>(_);
+    pub struct Pallet<T>(PhantomData<T>);
 
     // The pallet's runtime storage items.
     // https://docs.substrate.io/v3/runtime/storage
@@ -79,8 +80,6 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Event documentation should end with an array that provides descriptive names for event
-        /// parameters. [something, who]
         UpdatedMetadata(T::AccountId, Option<Vec<u8>>),
     }
 
