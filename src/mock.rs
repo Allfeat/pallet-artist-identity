@@ -171,30 +171,30 @@ pub mod mock_artists {
     pub struct Artist {
         pub account_id: <Test as system::Config>::AccountId,
         pub name: &'static str,
-        pub alias: Option<&'static str>,
-        pub bio: Option<&'static str>,
-        pub profile_pic: Option<&'static str>,
+        pub alias: &'static str,
+        pub bio: &'static str,
+        pub profile_pic: &'static str,
     }
 
     pub const ALICE: Artist = Artist {
         account_id: 0,
         name: "Alice",
-        alias: Some("Alice_alias"),
-        bio: Some("A simple artist to test stuff !"),
-        profile_pic: None,
+        alias: "Alice_alias",
+        bio: "A simple artist to test stuff !",
+        profile_pic: "",
     };
     pub const BOB: Artist = Artist {
         account_id: 1,
         name: "Bob",
-        alias: Some("Bob_alias"),
-        bio: Some("A simple artist to test stuff !"),
-        profile_pic: None,
+        alias: "Bob_alias",
+        bio: "A simple artist to test stuff !",
+        profile_pic: "",
     };
     pub const CHARLIE: Artist = Artist {
         account_id: 2,
         name: "Charlie",
-        alias: Some("Charlie_alias"),
-        bio: Some("A simple artist to test stuff !"),
-        profile_pic: None,
+        alias: "Charlie_alias",
+        bio: "A simple artist to test stuff !",
+        profile_pic: "",
     };
 }

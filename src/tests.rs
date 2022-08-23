@@ -15,11 +15,7 @@ mod fields_test {
     #[test]
     fn update_field() {
         new_test_ext().execute_with(|| {
-            let alice_alias: Option<Vec<u8>> = match ALICE.alias {
-                Some(alias) => Some(alias.into()),
-                None => None,
-            };
-            let expected_cost = ALICE.alias.unwrap().len() as u64 * mock::CostPerByte::get();
+            let expected_cost = ALICE.alias.len() as u64 * mock::CostPerByte::get();
 
             let balance_before = Balances::free_balance(ALICE.account_id);
 
@@ -30,25 +26,21 @@ mod fields_test {
             // Should update the alias with the ALICE alias
             assert_ok!(ArtistIdentity::update_alias(
                 Origin::signed(ALICE.account_id),
-                alice_alias.clone()
+                ALICE.alias.into()
             ));
 
             assert_last_event(Event::<Test>::UpdatedMetadata(
                 ALICE.account_id,
-                alice_alias.clone().try_into().unwrap(),
+                ALICE.alias.into(),
             ));
 
             let new_balance = Balances::free_balance(ALICE.account_id);
             current_metadata = ArtistIdentity::get_artist_metadata(ALICE.account_id);
 
-            let unbounded_current_alias: Option<Vec<u8>> = if current_metadata.alias.len() > 0 {
-                Some(current_metadata.alias.into())
-            } else {
-                None
-            };
+            let unbounded_current_alias: Vec<u8> = current_metadata.alias.into();
 
             assert_eq!(new_balance, balance_before - expected_cost);
-            assert_eq!(unbounded_current_alias, alice_alias);
+            assert_eq!(unbounded_current_alias, Vec::<u8>::from(ALICE.alias));
         })
     }
 
@@ -58,7 +50,7 @@ mod fields_test {
             let alice_styles = vec![b"Electro".to_vec(), b"Hardcore".to_vec()];
             let mut expected_cost: BalanceOf<Test> = Default::default();
             for style in &alice_styles {
-                expected_cost = expected_cost + Pallet::<Test>::compute_cost(Some(style.clone()));
+                expected_cost = expected_cost + Pallet::<Test>::compute_cost(style.clone());
             }
 
             let before_metadata: MetadataOf<Test> =

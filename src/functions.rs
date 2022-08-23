@@ -15,22 +15,13 @@ impl<T: Config> Pallet<T> {
     }
 
     /// Get the total cost to store a given data by multiplying the total of bytes with the cost per byte.
-    pub fn compute_cost(data: Option<Vec<u8>>) -> BalanceOf<T> {
-        match data {
-            Some(d) => {
-                let bytes_count = <BalanceOf<T>>::from(d.len() as u32);
-                bytes_count * T::CostPerByte::get()
-            }
-            None => <BalanceOf<T>>::from(0u32),
-        }
+    pub fn compute_cost(data: Vec<u8>) -> BalanceOf<T> {
+        let bytes_count = <BalanceOf<T>>::from(data.len() as u32);
+        bytes_count * T::CostPerByte::get()
     }
 
     /// Perform all mandatory actions to update a metadata field
-    pub fn update_field(
-        origin: OriginFor<T>,
-        field: FieldName,
-        value: Option<Vec<u8>>,
-    ) -> DispatchResult {
+    pub fn update_field(origin: OriginFor<T>, field: FieldName, value: Vec<u8>) -> DispatchResult {
         let caller = Self::ensure_signed_artist(origin)?;
         let metadata = <ArtistMetadata<T>>::get(caller.clone());
         let bounded_value = Self::into_field_for(value.clone(), &field)?;
@@ -43,26 +34,25 @@ impl<T: Config> Pallet<T> {
     }
 
     /// Get raw value of the specified field of the specified account id
-    pub fn get_raw_field_for(metadata: MetadataOf<T>, field: &FieldName) -> Option<Vec<u8>> {
+    pub fn get_raw_field_for(metadata: MetadataOf<T>, field: &FieldName) -> Vec<u8> {
         match field {
-            FieldName::Alias => Some(metadata.alias.into_inner()),
-            FieldName::Bio => Some(metadata.bio.into_inner()),
-            FieldName::ProfilePic => Some(metadata.profile_pic.into_inner()),
-            FieldName::Twitter => Some(metadata.twitter.into_inner()),
-            FieldName::Facebook => Some(metadata.facebook.into_inner()),
-            FieldName::Instagram => Some(metadata.instagram.into_inner()),
-            FieldName::Spotify => Some(metadata.spotify.into_inner()),
-            FieldName::AppleMusic => Some(metadata.apple_music.into_inner()),
+            FieldName::Alias => metadata.alias.into_inner(),
+            FieldName::Bio => metadata.bio.into_inner(),
+            FieldName::ProfilePic => metadata.profile_pic.into_inner(),
+            FieldName::Twitter => metadata.twitter.into_inner(),
+            FieldName::Facebook => metadata.facebook.into_inner(),
+            FieldName::Instagram => metadata.instagram.into_inner(),
+            FieldName::Spotify => metadata.spotify.into_inner(),
+            FieldName::AppleMusic => metadata.apple_music.into_inner(),
         }
     }
 
     /// Convert a raw value of a field to a `FieldType`
     pub fn into_field_for(
-        value: Option<Vec<u8>>,
+        value: Vec<u8>,
         field: &FieldName,
     ) -> Result<FieldType<T>, DispatchError> {
         let on_err = |_| Error::<T>::InvalidStringLength;
-        let value = value.unwrap_or_default();
         let result: FieldType<T> = match field {
             FieldName::Alias => Field::Alias(value.try_into().map_err(on_err)?),
             FieldName::Bio => Field::Bio(value.try_into().map_err(on_err)?),
@@ -102,7 +92,7 @@ impl<T: Config> Pallet<T> {
         caller: &T::AccountId,
         metadata: &MetadataOf<T>,
         field: &FieldName,
-        value: Option<Vec<u8>>,
+        value: Vec<u8>,
     ) -> DispatchResult {
         let new_cost = Self::compute_cost(value);
         let old_cost = Self::compute_cost(Self::get_raw_field_for(metadata.clone(), field));

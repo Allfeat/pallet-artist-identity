@@ -76,7 +76,7 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        UpdatedMetadata(T::AccountId, Option<Vec<u8>>),
+        UpdatedMetadata(T::AccountId, Vec<u8>),
         UpdatedStyles(T::AccountId, Vec<Vec<u8>>),
     }
 
@@ -97,55 +97,49 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(0)]
-        pub fn update_alias(origin: OriginFor<T>, alias: Option<Vec<u8>>) -> DispatchResult {
+        pub fn update_alias(origin: OriginFor<T>, alias: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, alias)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_bio(origin: OriginFor<T>, bio: Option<Vec<u8>>) -> DispatchResult {
+        pub fn update_bio(origin: OriginFor<T>, bio: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, bio)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_profile_picture(
-            origin: OriginFor<T>,
-            url: Option<Vec<u8>>,
-        ) -> DispatchResult {
+        pub fn update_profile_picture(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, url)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_twitter(origin: OriginFor<T>, username: Option<Vec<u8>>) -> DispatchResult {
+        pub fn update_twitter(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, username)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_facebook(origin: OriginFor<T>, url: Option<Vec<u8>>) -> DispatchResult {
+        pub fn update_facebook(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, url)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_instagram(origin: OriginFor<T>, username: Option<Vec<u8>>) -> DispatchResult {
+        pub fn update_instagram(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, username)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_spotify(origin: OriginFor<T>, artist_id: Option<Vec<u8>>) -> DispatchResult {
+        pub fn update_spotify(origin: OriginFor<T>, artist_id: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, artist_id)?;
             Ok(())
         }
 
         #[pallet::weight(0)]
-        pub fn update_apple_music(
-            origin: OriginFor<T>,
-            username: Option<Vec<u8>>,
-        ) -> DispatchResult {
+        pub fn update_apple_music(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, username)?;
             Ok(())
         }
@@ -173,7 +167,7 @@ pub mod pallet {
                     return Err(pallet_music_styles::Error::<T>::StyleNotFound)?;
                 }
 
-                total_styles_cost = total_styles_cost + Self::compute_cost(Some(style.clone()));
+                total_styles_cost = total_styles_cost + Self::compute_cost(style.clone());
 
                 bounded_styles
                     .try_push(s)
@@ -183,7 +177,7 @@ pub mod pallet {
             let mut old_cost: BalanceOf<T> = Default::default();
             for style in metadata.music_styles {
                 let unbounded_style: Vec<u8> = style.into();
-                old_cost = old_cost + Self::compute_cost(Some(unbounded_style));
+                old_cost = old_cost + Self::compute_cost(unbounded_style);
             }
 
             if total_styles_cost > old_cost {
