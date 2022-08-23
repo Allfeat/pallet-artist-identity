@@ -3,12 +3,20 @@ use super::*;
 pub type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
+pub type MetadataOf<T> = Metadata<
+    BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
+    BoundedVec<u8, <T as Config>::MaxDescriptionLength>,
+    BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
+    BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
+    BoundedVec<pallet_music_styles::BoundedStyle<T>, <T as Config>::MaxRegisteredStyles>,
+>;
+
 #[derive(Clone, Default, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
-pub struct Metadata<BoundedString, Description, Url, Username> {
+pub struct Metadata<BoundedString, Description, Url, Username, BoundedStyles> {
     pub(super) alias: BoundedString,
     pub(super) bio: Description,
     pub(super) profile_pic: Url,
-    // TODO music styles
+    pub(super) music_styles: BoundedStyles,
 
     // Socials
     pub(super) twitter: Username,
@@ -18,9 +26,6 @@ pub struct Metadata<BoundedString, Description, Url, Username> {
     // Music links
     pub(super) spotify: Url,
     pub(super) apple_music: Url,
-
-    // Dev
-    pub(super) test: BoundedString,
 }
 
 #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]

@@ -30,6 +30,7 @@ frame_support::construct_runtime!(
         System: frame_system,
         ArtistIdentity: pallet_artist_identity,
         Balances: pallet_balances,
+        MusicStyles: pallet_music_styles,
         Artists: pallet_artists,
     }
 );
@@ -93,6 +94,7 @@ parameter_types! {
     pub const CostPerByte: u64 = 5;
     pub const MaxDefaultStringLength: u32 = 256;
     pub const MaxDescriptionLength: u32 = 521;
+    pub const MaxRegisteredStyles: u32 = 3;
 }
 
 impl pallet_artist_identity::Config for Test {
@@ -102,6 +104,21 @@ impl pallet_artist_identity::Config for Test {
     type Artists = Artists;
     type CostPerByte = CostPerByte;
     type MaxDescriptionLength = MaxDescriptionLength;
+    type MaxRegisteredStyles = MaxRegisteredStyles;
+}
+
+parameter_types! {
+    pub const MaxStyleCount: u32 = 3;
+    pub const MaxSubStyleCount: u32 = 5;
+    pub const StyleNameMaxLength: u32 = 64;
+}
+
+impl pallet_music_styles::Config for Test {
+    type Event = Event;
+    type AdminOrigin = EnsureRoot<Self::AccountId>;
+    type MaxStyleCount = MaxStyleCount;
+    type MaxSubStyleCount = MaxSubStyleCount;
+    type NameMaxLength = StyleNameMaxLength;
 }
 
 // Build genesis storage according to the mock runtime.
@@ -126,9 +143,22 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
         ],
         candidates: vec![(CHARLIE.account_id, CHARLIE.name.into())],
     };
+    let styles_config: pallet_music_styles::GenesisConfig<Test> =
+        pallet_music_styles::GenesisConfig {
+            styles: vec![
+                ("Electro".into(), vec![]),
+                (
+                    "Rap".into(),
+                    vec!["Drill".into(), "Trap".into(), "Hardcore".into()],
+                ),
+                ("Rock".into(), vec!["Hardcore".into()]),
+            ],
+            phantom: Default::default(),
+        };
 
     config.assimilate_storage(&mut storage).unwrap();
     artist_config.assimilate_storage(&mut storage).unwrap();
+    styles_config.assimilate_storage(&mut storage).unwrap();
 
     let mut ext: sp_io::TestExternalities = storage.into();
     ext.execute_with(|| System::set_block_number(1));
