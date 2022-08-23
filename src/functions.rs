@@ -43,15 +43,7 @@ impl<T: Config> Pallet<T> {
     }
 
     /// Get raw value of the specified field of the specified account id
-    pub fn get_raw_field_for(
-        metadata: Metadata<
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-            BoundedVec<u8, T::MaxDescriptionLength>,
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-        >,
-        field: &FieldName,
-    ) -> Option<Vec<u8>> {
+    pub fn get_raw_field_for(metadata: MetadataOf<T>, field: &FieldName) -> Option<Vec<u8>> {
         match field {
             FieldName::Alias => Some(metadata.alias.into_inner()),
             FieldName::Bio => Some(metadata.bio.into_inner()),
@@ -87,12 +79,7 @@ impl<T: Config> Pallet<T> {
     /// Update the given field of the given metadata object for an account id and update it on-chain
     fn update_metadata(
         caller: &T::AccountId,
-        mut metadata: Metadata<
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-            BoundedVec<u8, T::MaxDescriptionLength>,
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-        >,
+        mut metadata: MetadataOf<T>,
         value: FieldType<T>,
     ) -> DispatchResult {
         match value {
@@ -113,12 +100,7 @@ impl<T: Config> Pallet<T> {
     /// Compute if the cost for storing the new data is less or more than before for the specified field of a specified metadata object and pay or refund the caller
     fn pay_or_refund_cost_difference(
         caller: &T::AccountId,
-        metadata: &Metadata<
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-            BoundedVec<u8, T::MaxDescriptionLength>,
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-            BoundedVec<u8, T::MaxDefaultStringLength>,
-        >,
+        metadata: &MetadataOf<T>,
         field: &FieldName,
         value: Option<Vec<u8>>,
     ) -> DispatchResult {
