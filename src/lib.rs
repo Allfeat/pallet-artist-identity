@@ -12,6 +12,7 @@ mod tests;
 
 mod functions;
 mod types;
+mod weights;
 use types::*;
 
 #[cfg(feature = "runtime-benchmarks")]
@@ -27,6 +28,7 @@ use sp_std::prelude::*;
 
 #[frame_support::pallet]
 pub mod pallet {
+    use crate::weights::WeightInfo;
     use crate::Event::UpdatedStyles;
     use frame_support::traits::ReservableCurrency;
     use pallet_music_styles::BoundedStyle;
@@ -42,8 +44,11 @@ pub mod pallet {
         /// Used to pay the data stored.
         type Currency: ReservableCurrency<Self::AccountId>;
 
-        /// The storage containing the artists/candidates.
-        type Artists: Contains<Self::AccountId>;
+        /// The Origin emitted by an Artist call.
+        type ArtistOrigin: EnsureOrigin<
+            <Self as frame_system::Config>::Origin,
+            Success = Self::AccountId,
+        >;
 
         /// The cost of storing one byte of data.
         #[pallet::constant]
@@ -58,6 +63,9 @@ pub mod pallet {
 
         #[pallet::constant]
         type MaxDescriptionLength: Get<u32>;
+
+        /// Weight information for extrinsics in this pallet.
+        type Weights: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -76,8 +84,17 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        UpdatedMetadata(T::AccountId, Vec<u8>),
-        UpdatedStyles(T::AccountId, Vec<Vec<u8>>),
+        /// A field has been updated for the artist.
+        UpdatedMetadata {
+            artist: T::AccountId,
+            field: FieldName,
+            new_data: Vec<u8>,
+        },
+        /// Music Styles has been updated for the artist.
+        UpdatedStyles {
+            artist: T::AccountId,
+            new_styles: Vec<Vec<u8>>,
+        },
     }
 
     // Errors inform users that something went wrong.
@@ -96,55 +113,58 @@ pub mod pallet {
     // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_alias(T::MaxDefaultStringLength::get()))]
         pub fn update_alias(origin: OriginFor<T>, alias: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, alias)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_bio(T::MaxDescriptionLength::get()))]
         pub fn update_bio(origin: OriginFor<T>, bio: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, bio)?;
+            Self::update_field(origin, FieldName::Bio, bio)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_profile_picture(T::MaxDefaultStringLength::get()))]
         pub fn update_profile_picture(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, url)?;
+            Self::update_field(origin, FieldName::ProfilePic, url)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_twitter(T::MaxDefaultStringLength::get()))]
         pub fn update_twitter(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, username)?;
+            Self::update_field(origin, FieldName::Twitter, username)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_facebook(T::MaxDefaultStringLength::get()))]
         pub fn update_facebook(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, url)?;
+            Self::update_field(origin, FieldName::Facebook, url)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_instagram(T::MaxDefaultStringLength::get()))]
         pub fn update_instagram(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, username)?;
+            Self::update_field(origin, FieldName::Instagram, username)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_spotify(T::MaxDefaultStringLength::get()))]
         pub fn update_spotify(origin: OriginFor<T>, artist_id: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, artist_id)?;
+            Self::update_field(origin, FieldName::Spotify, artist_id)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_apple_music(T::MaxDefaultStringLength::get()))]
         pub fn update_apple_music(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
-            Self::update_field(origin, FieldName::Alias, username)?;
+            Self::update_field(origin, FieldName::AppleMusic, username)?;
             Ok(())
         }
 
-        #[pallet::weight(0)]
+        #[pallet::weight(T::Weights::update_music_styles(
+            T::MaxDefaultStringLength::get(),
+            T::NameMaxLength::get()
+        ))]
         pub fn update_music_styles(origin: OriginFor<T>, styles: Vec<Vec<u8>>) -> DispatchResult {
             let caller = Self::ensure_signed_artist(origin)?;
             let mut metadata = <ArtistMetadata<T>>::get(caller.clone());
@@ -190,7 +210,10 @@ pub mod pallet {
             metadata.music_styles = bounded_styles;
             <ArtistMetadata<T>>::insert(caller.clone(), metadata);
 
-            Self::deposit_event(UpdatedStyles(caller, styles));
+            Self::deposit_event(UpdatedStyles {
+                artist: caller,
+                new_styles: styles,
+            });
 
             Ok(())
         }

@@ -40,7 +40,7 @@ pub enum Field<BoundedString, Description, Url, Username> {
     AppleMusic(Url),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
 pub enum FieldName {
     Alias,
     Bio,
