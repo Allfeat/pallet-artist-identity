@@ -3,8 +3,9 @@ use crate::{
     self as pallet_artist_identity,
     mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::GenesisBuild,
 };
-use frame_support::traits::{ConstU16, ConstU64};
+use frame_support::traits::{ConstU16, ConstU64, SortedMembers};
 use frame_system as system;
+use frame_system::EnsureSignedBy;
 use pallet_artists;
 use pallet_balances;
 use sp_core::H256;
@@ -84,10 +85,13 @@ parameter_types! {
 
 impl pallet_artists::Config for Test {
     type Event = Event;
+    type Origin = Origin;
+    type Call = Call;
     type Currency = Balances;
     type AdminOrigin = EnsureRoot<Self::AccountId>;
     type CreationDepositAmount = CreationDepositAmount;
     type NameMaxLength = NameMaxLength;
+    type WeightInfo = ();
 }
 
 parameter_types! {
@@ -97,14 +101,22 @@ parameter_types! {
     pub const MaxRegisteredStyles: u32 = 3;
 }
 
+pub struct ArtistMock;
+impl SortedMembers<u64> for ArtistMock {
+    fn sorted_members() -> Vec<u64> {
+        vec![0, 1, 2]
+    }
+}
+
 impl pallet_artist_identity::Config for Test {
     type Event = Event;
     type Currency = Balances;
     type MaxDefaultStringLength = MaxDefaultStringLength;
-    type Artists = Artists;
+    type ArtistOrigin = EnsureSignedBy<ArtistMock, Self::AccountId>;
     type CostPerByte = CostPerByte;
     type MaxDescriptionLength = MaxDescriptionLength;
     type MaxRegisteredStyles = MaxRegisteredStyles;
+    type Weights = ();
 }
 
 parameter_types! {
@@ -122,7 +134,7 @@ impl pallet_music_styles::Config for Test {
 }
 
 // Build genesis storage according to the mock runtime.
-pub fn new_test_ext() -> sp_io::TestExternalities {
+pub fn new_test_ext(include_styles: bool) -> sp_io::TestExternalities {
     let mut storage = system::GenesisConfig::default()
         .build_storage::<Test>()
         .unwrap();
@@ -143,22 +155,25 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
         ],
         candidates: vec![(CHARLIE.account_id, CHARLIE.name.into())],
     };
-    let styles_config: pallet_music_styles::GenesisConfig<Test> =
-        pallet_music_styles::GenesisConfig {
-            styles: vec![
-                ("Electro".into(), vec![]),
-                (
-                    "Rap".into(),
-                    vec!["Drill".into(), "Trap".into(), "Hardcore".into()],
-                ),
-                ("Rock".into(), vec!["Hardcore".into()]),
-            ],
-            phantom: Default::default(),
-        };
+
+    if include_styles {
+        let styles_config: pallet_music_styles::GenesisConfig<Test> =
+            pallet_music_styles::GenesisConfig {
+                styles: vec![
+                    ("Electro".into(), vec![]),
+                    (
+                        "Rap".into(),
+                        vec!["Drill".into(), "Trap".into(), "Hardcore".into()],
+                    ),
+                    ("Rock".into(), vec!["Hardcore".into()]),
+                ],
+                phantom: Default::default(),
+            };
+        styles_config.assimilate_storage(&mut storage).unwrap();
+    }
 
     config.assimilate_storage(&mut storage).unwrap();
     artist_config.assimilate_storage(&mut storage).unwrap();
-    styles_config.assimilate_storage(&mut storage).unwrap();
 
     let mut ext: sp_io::TestExternalities = storage.into();
     ext.execute_with(|| System::set_block_number(1));

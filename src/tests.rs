@@ -14,7 +14,7 @@ mod fields_test {
 
     #[test]
     fn update_field() {
-        new_test_ext().execute_with(|| {
+        new_test_ext(true).execute_with(|| {
             let expected_cost = ALICE.alias.len() as u64 * mock::CostPerByte::get();
 
             let balance_before = Balances::free_balance(ALICE.account_id);
@@ -29,10 +29,11 @@ mod fields_test {
                 ALICE.alias.into()
             ));
 
-            assert_last_event(Event::<Test>::UpdatedMetadata(
-                ALICE.account_id,
-                ALICE.alias.into(),
-            ));
+            assert_last_event(Event::<Test>::UpdatedMetadata {
+                artist: ALICE.account_id,
+                field: FieldName::Alias,
+                new_data: ALICE.alias.into(),
+            });
 
             let new_balance = Balances::free_balance(ALICE.account_id);
             current_metadata = ArtistIdentity::get_artist_metadata(ALICE.account_id);
@@ -46,7 +47,7 @@ mod fields_test {
 
     #[test]
     fn update_styles() {
-        new_test_ext().execute_with(|| {
+        new_test_ext(true).execute_with(|| {
             let alice_styles = vec![b"Electro".to_vec(), b"Hardcore".to_vec()];
             let mut expected_cost: BalanceOf<Test> = Default::default();
             for style in &alice_styles {

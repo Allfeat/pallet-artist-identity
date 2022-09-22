@@ -2,15 +2,9 @@ use super::*;
 use frame_support::traits::ReservableCurrency;
 
 impl<T: Config> Pallet<T> {
-    /// Return true if an account is an artist or a candidate artist.
-    pub fn is_artist(account: &T::AccountId) -> bool {
-        T::Artists::contains(account)
-    }
-
     /// Ensure that the caller signed the transaction and is an Artist or a Candidate
     pub fn ensure_signed_artist(origin: OriginFor<T>) -> Result<T::AccountId, DispatchError> {
-        let caller = ensure_signed(origin)?;
-        ensure!(Self::is_artist(&caller), Error::<T>::NotArtistOrCandidate);
+        let caller = T::ArtistOrigin::ensure_origin(origin)?;
         Ok(caller)
     }
 
@@ -28,7 +22,11 @@ impl<T: Config> Pallet<T> {
 
         Self::pay_or_refund_cost_difference(&caller, &metadata, &field, value.clone())?;
         Self::update_metadata(&caller, metadata, bounded_value.clone())?;
-        Self::deposit_event(Event::<T>::UpdatedMetadata(caller.clone(), value));
+        Self::deposit_event(Event::<T>::UpdatedMetadata {
+            artist: caller.clone(),
+            field,
+            new_data: value,
+        });
 
         Ok(())
     }
