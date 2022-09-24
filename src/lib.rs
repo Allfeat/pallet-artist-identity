@@ -25,10 +25,10 @@ use frame_support::{
 use frame_system::pallet_prelude::*;
 pub use pallet::*;
 use sp_std::prelude::*;
+use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use crate::weights::WeightInfo;
     use crate::Event::UpdatedStyles;
     use frame_support::traits::ReservableCurrency;
     use pallet_music_styles::BoundedStyle;
@@ -113,55 +113,55 @@ pub mod pallet {
     // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        #[pallet::weight(T::Weights::update_alias(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_alias(T::MaxDefaultStringLength::get()))]
         pub fn update_alias(origin: OriginFor<T>, alias: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, alias)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_bio(T::MaxDescriptionLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_bio(T::MaxDescriptionLength::get()))]
         pub fn update_bio(origin: OriginFor<T>, bio: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Bio, bio)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_profile_picture(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_profile_picture(T::MaxDefaultStringLength::get()))]
         pub fn update_profile_picture(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::ProfilePic, url)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_twitter(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_twitter(T::MaxDefaultStringLength::get()))]
         pub fn update_twitter(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Twitter, username)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_facebook(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_facebook(T::MaxDefaultStringLength::get()))]
         pub fn update_facebook(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Facebook, url)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_instagram(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_instagram(T::MaxDefaultStringLength::get()))]
         pub fn update_instagram(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Instagram, username)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_spotify(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_spotify(T::MaxDefaultStringLength::get()))]
         pub fn update_spotify(origin: OriginFor<T>, artist_id: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Spotify, artist_id)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_apple_music(T::MaxDefaultStringLength::get()))]
+        #[pallet::weight(<T as Config>::Weights::update_apple_music(T::MaxDefaultStringLength::get()))]
         pub fn update_apple_music(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::AppleMusic, username)?;
             Ok(())
         }
 
-        #[pallet::weight(T::Weights::update_music_styles(
+        #[pallet::weight(<T as Config>::Weights::update_music_styles(
             T::MaxDefaultStringLength::get(),
             T::NameMaxLength::get()
         ))]
