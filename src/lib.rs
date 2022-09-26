@@ -18,10 +18,7 @@ use types::*;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
-use frame_support::{
-    pallet_prelude::*,
-    traits::{Contains, Currency},
-};
+use frame_support::{pallet_prelude::*, traits::Currency};
 use frame_system::pallet_prelude::*;
 pub use pallet::*;
 use sp_std::prelude::*;

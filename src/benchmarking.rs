@@ -2,9 +2,7 @@
 
 use super::*;
 
-use frame_benchmarking::{
-    benchmarks, impl_benchmark_test_suite, whitelist_account, whitelisted_caller,
-};
+use frame_benchmarking::{benchmarks, whitelist_account};
 #[allow(unused)]
 use frame_support::dispatch::UnfilteredDispatchable;
 use sp_runtime::traits::Bounded;
@@ -174,6 +172,6 @@ benchmarks! {
             new_styles: styles
         }.into());
     }
-}
 
-impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(false), crate::mock::Test);
+    impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(false), crate::mock::Test);
+}
