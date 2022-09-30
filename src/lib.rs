@@ -12,7 +12,7 @@ mod tests;
 
 mod functions;
 mod types;
-mod weights;
+pub mod weights;
 use types::*;
 
 #[cfg(feature = "runtime-benchmarks")]
