@@ -1,10 +1,9 @@
 use super::*;
-use allfeat_support::types::StyleName;
 
 pub type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
-pub type StyleListOf<T> = BoundedVec<StyleName, <T as Config>::MaxRegisteredStyles>;
+pub type StyleListOf<T> = BoundedVec<MusicStyleName, <T as Config>::MaxRegisteredStyles>;
 pub type MetadataOf<T> = Metadata<
     BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
     BoundedVec<u8, <T as Config>::MaxDescriptionLength>,

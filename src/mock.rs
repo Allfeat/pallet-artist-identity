@@ -1,8 +1,3 @@
-/// This mocking is adapted to the environnement of the Allfeat chain.
-use crate::{
-    self as pallet_artist_identity,
-    mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::GenesisBuild,
-};
 use frame_support::traits::{ConstU16, ConstU64, SortedMembers};
 use frame_system as system;
 use frame_system::EnsureSignedBy;
@@ -17,6 +12,12 @@ use sp_runtime::{
 use system::EnsureRoot;
 
 use mock_artists::*;
+
+/// This mocking is adapted to the environnement of the Allfeat chain.
+use crate::{
+    self as pallet_artist_identity,
+    mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::GenesisBuild,
+};
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -111,11 +112,14 @@ impl SortedMembers<u64> for ArtistMock {
 impl pallet_artist_identity::Config for Test {
     type Event = Event;
     type Currency = Balances;
+    type StylesProvider = MusicStyles;
     type MaxDefaultStringLength = MaxDefaultStringLength;
     type ArtistOrigin = EnsureSignedBy<ArtistMock, Self::AccountId>;
     type CostPerByte = CostPerByte;
     type MaxDescriptionLength = MaxDescriptionLength;
     type MaxRegisteredStyles = MaxRegisteredStyles;
+    #[cfg(feature = "runtime-benchmarks")]
+    type StylesHelper = MusicStyles;
     type Weights = ();
 }
 
@@ -128,9 +132,6 @@ parameter_types! {
 impl pallet_music_styles::Config for Test {
     type Event = Event;
     type AdminOrigin = EnsureRoot<Self::AccountId>;
-    type MaxStyleCount = MaxStyleCount;
-    type MaxSubStyleCount = MaxSubStyleCount;
-    type NameMaxLength = StyleNameMaxLength;
     type Weights = ();
 }
 

@@ -1,5 +1,18 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use allfeat_support::prelude::*;
+use allfeat_support::traits::music::style::MutateMusicStyles;
+use allfeat_support::types::music::style::MaxNameLength;
+use frame_support::traits::ReservableCurrency;
+use frame_support::{pallet_prelude::*, traits::Currency};
+use frame_system::pallet_prelude::*;
+use sp_runtime::traits::Saturating;
+use sp_std::prelude::*;
+
+pub use pallet::*;
+use types::*;
+use weights::WeightInfo;
+
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://docs.substrate.io/v3/runtime/frame>
@@ -10,36 +23,26 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
 mod functions;
 mod types;
 pub mod weights;
-use types::*;
-
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
-
-use frame_support::{pallet_prelude::*, traits::Currency};
-use frame_system::pallet_prelude::*;
-pub use pallet::*;
-use sp_std::prelude::*;
-use weights::WeightInfo;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use crate::Event::UpdatedStyles;
-    use frame_support::traits::ReservableCurrency;
-    use pallet_music_styles::BoundedStyle;
-
     use super::*;
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-    pub trait Config: frame_system::Config + pallet_music_styles::Config {
+    pub trait Config: frame_system::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
         /// Used to pay the data stored.
         type Currency: ReservableCurrency<Self::AccountId>;
+
+        type StylesProvider: InspectMusicStyles<StyleName = MusicStyleName>;
 
         /// The Origin emitted by an Artist call.
         type ArtistOrigin: EnsureOrigin<
@@ -60,6 +63,9 @@ pub mod pallet {
 
         #[pallet::constant]
         type MaxDescriptionLength: Get<u32>;
+
+        #[cfg(feature = "runtime-benchmarks")]
+        type StylesHelper: MutateMusicStyles<StyleName = MusicStyleName>;
 
         /// Weight information for extrinsics in this pallet.
         type Weights: WeightInfo;
@@ -103,6 +109,8 @@ pub mod pallet {
         InvalidStringLength,
         /// The number of given styles is higher than the maximum styles authorized for a profile.
         TooMuchStylesSpecified,
+        /// The given style name is not an existant style.
+        InexistantStyle,
     }
 
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -160,41 +168,36 @@ pub mod pallet {
 
         #[pallet::weight(<T as Config>::Weights::update_music_styles(
             T::MaxDefaultStringLength::get(),
-            T::NameMaxLength::get()
+            <MaxNameLength as Get<u32>>::get()
         ))]
         pub fn update_music_styles(origin: OriginFor<T>, styles: Vec<Vec<u8>>) -> DispatchResult {
             let caller = Self::ensure_signed_artist(origin)?;
             let mut metadata = <ArtistMetadata<T>>::get(caller.clone());
-            let styles_db = <pallet_music_styles::Styles<T>>::get();
 
-            let mut bounded_styles: BoundedVec<BoundedStyle<T>, T::MaxRegisteredStyles> =
-                Default::default();
+            let mut bounded_styles: StyleListOf<T> = Default::default();
 
             let mut total_styles_cost: BalanceOf<T> = Default::default();
 
             for style in &styles {
-                let s = pallet_music_styles::Pallet::<T>::to_bounded_style(style.clone())?;
+                let s = T::StylesProvider::exist_from(style.clone())
+                    .map_err(|_| Error::<T>::InvalidStringLength)?;
 
-                if !styles_db.contains_key(&s)
-                    && styles_db
-                        .values()
-                        .find(|style| style.contains(&s))
-                        .is_none()
-                {
-                    return Err(pallet_music_styles::Error::<T>::StyleNotFound)?;
+                total_styles_cost = total_styles_cost.saturating_add(Self::compute_cost(&style));
+
+                match s {
+                    Some(bounded) => {
+                        bounded_styles
+                            .try_push(bounded)
+                            .map_err(|_| Error::<T>::TooMuchStylesSpecified)?;
+                    }
+                    None => return Err(Error::<T>::InexistantStyle)?,
                 }
-
-                total_styles_cost = total_styles_cost + Self::compute_cost(style.clone());
-
-                bounded_styles
-                    .try_push(s)
-                    .map_err(|_| Error::<T>::TooMuchStylesSpecified)?;
             }
 
             let mut old_cost: BalanceOf<T> = Default::default();
             for style in metadata.music_styles {
                 let unbounded_style: Vec<u8> = style.into();
-                old_cost = old_cost + Self::compute_cost(unbounded_style);
+                old_cost = old_cost + Self::compute_cost(&unbounded_style);
             }
 
             if total_styles_cost > old_cost {
@@ -207,7 +210,7 @@ pub mod pallet {
             metadata.music_styles = bounded_styles;
             <ArtistMetadata<T>>::insert(caller.clone(), metadata);
 
-            Self::deposit_event(UpdatedStyles {
+            Self::deposit_event(Event::<T>::UpdatedStyles {
                 artist: caller,
                 new_styles: styles,
             });

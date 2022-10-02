@@ -1,5 +1,6 @@
-use super::*;
 use frame_support::traits::ReservableCurrency;
+
+use super::*;
 
 impl<T: Config> Pallet<T> {
     /// Ensure that the caller signed the transaction and is an Artist or a Candidate
