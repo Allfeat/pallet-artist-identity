@@ -1,10 +1,13 @@
-use super::*;
-use crate::{mock::*, Event};
 use frame_support::assert_ok;
 
+use crate::{mock::*, Event};
+
+use super::*;
+
 mod fields_test {
-    use crate::mock::mock_artists::ALICE;
     use frame_support::assert_noop;
+
+    use crate::mock::mock_artists::ALICE;
 
     use super::*;
 
@@ -51,7 +54,7 @@ mod fields_test {
             let alice_styles = vec![b"Electro".to_vec(), b"Hardcore".to_vec()];
             let mut expected_cost: BalanceOf<Test> = Default::default();
             for style in &alice_styles {
-                expected_cost = expected_cost + Pallet::<Test>::compute_cost(style.clone());
+                expected_cost = expected_cost + Pallet::<Test>::compute_cost(&style);
             }
 
             let before_metadata: MetadataOf<Test> =
@@ -65,7 +68,7 @@ mod fields_test {
                     Origin::signed(ALICE.account_id),
                     vec![b"Non existant".to_vec()]
                 ),
-                pallet_music_styles::Error::<Test>::StyleNotFound
+                Error::<Test>::InexistantStyle
             );
 
             assert_ok!(ArtistIdentity::update_music_styles(

@@ -1,11 +1,11 @@
 //! Benchmarking setup for pallet-template
 
-use super::*;
-
 use frame_benchmarking::{benchmarks, whitelist_account};
 #[allow(unused)]
 use frame_support::dispatch::UnfilteredDispatchable;
 use sp_runtime::traits::Bounded;
+
+use super::*;
 
 struct BenchmarkData<T: Config> {
     pub origin: T::Origin,
@@ -146,18 +146,15 @@ benchmarks! {
 
     update_music_styles {
         let n in 1..T::MaxRegisteredStyles::get();
-        let x in 1..T::NameMaxLength::get();
+        let x in 1..<T::StylesProvider as InspectMusicStyles>::StyleName::max_encoded_len()
+            .saturating_sub(1) as u32;
 
-        let styles_origin = T::AdminOrigin::successful_origin();
         let mut styles: Vec<Vec<u8>> = Vec::new();
         for i in 0..n {
-            styles.push(vec![0u8 + i as u8; x as usize])
+            styles.push(vec![0x61 + i as u8; x as usize])
         }
         for style in &styles {
-            pallet_music_styles::Call::<T>::add_style {
-                name: style.clone(),
-                sub: None
-            }.dispatch_bypass_filter(styles_origin.clone())?;
+            T::StylesHelper::add_parent_style(style.clone().try_into().unwrap())?;
         }
 
         let origin = T::ArtistOrigin::successful_origin();

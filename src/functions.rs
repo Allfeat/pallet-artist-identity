@@ -1,5 +1,6 @@
-use super::*;
 use frame_support::traits::ReservableCurrency;
+
+use super::*;
 
 impl<T: Config> Pallet<T> {
     /// Ensure that the caller signed the transaction and is an Artist or a Candidate
@@ -9,7 +10,7 @@ impl<T: Config> Pallet<T> {
     }
 
     /// Get the total cost to store a given data by multiplying the total of bytes with the cost per byte.
-    pub fn compute_cost(data: Vec<u8>) -> BalanceOf<T> {
+    pub fn compute_cost(data: &Vec<u8>) -> BalanceOf<T> {
         let bytes_count = <BalanceOf<T>>::from(data.len() as u32);
         bytes_count * T::CostPerByte::get()
     }
@@ -92,8 +93,8 @@ impl<T: Config> Pallet<T> {
         field: &FieldName,
         value: Vec<u8>,
     ) -> DispatchResult {
-        let new_cost = Self::compute_cost(value);
-        let old_cost = Self::compute_cost(Self::get_raw_field_for(metadata.clone(), field));
+        let new_cost = Self::compute_cost(&value);
+        let old_cost = Self::compute_cost(&Self::get_raw_field_for(metadata.clone(), field));
 
         if new_cost > old_cost {
             T::Currency::reserve(&caller, new_cost - old_cost)?;

@@ -26,8 +26,9 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get};
+use frame_support::traits::Get;
 use frame_support::weights::constants::RocksDbWeight;
+use frame_support::weights::Weight;
 use sp_std::marker::PhantomData;
 
 pub trait WeightInfo {
@@ -131,8 +132,6 @@ impl<T: frame_system::Config> WeightInfo for AllfeatWeightInfo<T> {
             .saturating_add(T::DbWeight::get().writes(1 as Weight))
     }
 }
-
-use frame_support::weights::Weight;
 
 impl WeightInfo for () {
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)

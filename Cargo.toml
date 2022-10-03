@@ -24,15 +24,14 @@ frame-system = { default-features = false, version = "4.0.0-dev", git = "https:/
 frame-benchmarking = { default-features = false, version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27", optional = true }
 sp-runtime = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
 sp-std = { default-features = false, version = "4.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
-
-pallet-music-styles = { version = "0.1.0-dev", default-features = false, git = "ssh://git@github.com/Allfeat/pallet-music-styles.git", branch = "master" }
+allfeat-support = { version = "0.1.0-dev", default-features = false, git = "ssh://git@github.com/allfeat/allfeat-support.git", branch = "master" }
 
 [dev-dependencies]
 sp-core = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
 sp-io = { default-features = false, version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
-pallet-collective = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
 pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.27" }
 pallet-artists = { version = "1.0.0-dev", default-features = false, git = "ssh://git@github.com/Allfeat/pallet-artists.git", branch = "master" }
+pallet-music-styles = { version = "0.1.0-dev", default-features = false, path = "../../pallet-music-styles" }
 
 [features]
 default = ["std"]
@@ -40,9 +39,9 @@ std = [
   "codec/std",
   "scale-info/std",
   "frame-support/std",
+  "allfeat-support/std",
   "frame-system/std",
   "frame-benchmarking/std",
-  "pallet-collective/std",
   "pallet-balances/std",
   "pallet-artists/std",
   "pallet-music-styles/std"
@@ -51,6 +50,7 @@ std = [
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",
     "frame-support/runtime-benchmarks",
-    "frame-system/runtime-benchmarks"
+    "frame-system/runtime-benchmarks",
+    "pallet-music-styles/runtime-benchmarks"
 ]
 try-runtime = ["frame-support/try-runtime"]
