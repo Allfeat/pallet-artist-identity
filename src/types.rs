@@ -3,12 +3,13 @@ use super::*;
 pub type BalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
+pub type StyleListOf<T> = BoundedVec<MusicStyleName, <T as Config>::MaxRegisteredStyles>;
 pub type MetadataOf<T> = Metadata<
     BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
     BoundedVec<u8, <T as Config>::MaxDescriptionLength>,
     BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
     BoundedVec<u8, <T as Config>::MaxDefaultStringLength>,
-    BoundedVec<pallet_music_styles::BoundedStyle<T>, <T as Config>::MaxRegisteredStyles>,
+    StyleListOf<T>,
 >;
 
 #[derive(Clone, Default, Encode, Decode, Eq, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
