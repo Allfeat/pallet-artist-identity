@@ -141,12 +141,12 @@ pub fn new_test_ext(include_styles: bool) -> sp_io::TestExternalities {
         .build_storage::<Test>()
         .unwrap();
 
-    // Give 100 tokens to the 100 first accounts
+    // Give 100000 tokens to the 5 first accounts
     let config: pallet_balances::GenesisConfig<Test> = pallet_balances::GenesisConfig {
-        balances: (0..100)
+        balances: (0..5)
             .collect::<Vec<u64>>()
             .iter()
-            .map(|&account_id| (account_id, 100))
+            .map(|&account_id| (account_id, 100000))
             .collect(),
     };
 
