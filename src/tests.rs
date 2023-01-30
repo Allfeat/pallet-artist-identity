@@ -12,7 +12,7 @@ mod fields_test {
     use super::*;
 
     fn assert_last_event(event: Event<Test>) {
-        System::assert_last_event(mock::Event::ArtistIdentity(event))
+        System::assert_last_event(mock::RuntimeEvent::ArtistIdentity(event))
     }
 
     #[test]
@@ -28,7 +28,7 @@ mod fields_test {
 
             // Should update the alias with the ALICE alias
             assert_ok!(ArtistIdentity::update_alias(
-                Origin::signed(ALICE.account_id),
+                RuntimeOrigin::signed(ALICE.account_id),
                 ALICE.alias.into()
             ));
 
@@ -65,14 +65,14 @@ mod fields_test {
 
             assert_noop!(
                 ArtistIdentity::update_music_styles(
-                    Origin::signed(ALICE.account_id),
+                    RuntimeOrigin::signed(ALICE.account_id),
                     vec![b"Non existant".to_vec()]
                 ),
                 Error::<Test>::InexistantStyle
             );
 
             assert_ok!(ArtistIdentity::update_music_styles(
-                Origin::signed(ALICE.account_id),
+                RuntimeOrigin::signed(ALICE.account_id),
                 alice_styles
             ));
 

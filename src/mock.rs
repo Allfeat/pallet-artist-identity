@@ -1,3 +1,4 @@
+use frame_support::parameter_types;
 use frame_support::traits::{ConstU16, ConstU64, SortedMembers};
 use frame_system as system;
 use frame_system::EnsureSignedBy;
@@ -5,7 +6,6 @@ use pallet_artists;
 use pallet_balances;
 use sp_core::H256;
 use sp_runtime::{
-    parameter_types,
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
 };
@@ -42,8 +42,8 @@ impl system::Config for Test {
     type BlockWeights = ();
     type BlockLength = ();
     type DbWeight = ();
-    type Origin = Origin;
-    type Call = Call;
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeCall = RuntimeCall;
     type Index = u64;
     type BlockNumber = u64;
     type Hash = H256;
@@ -51,7 +51,7 @@ impl system::Config for Test {
     type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
     type Header = Header;
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
@@ -67,7 +67,7 @@ impl system::Config for Test {
 impl pallet_balances::Config for Test {
     type Balance = u64;
     type DustRemoval = ();
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type ExistentialDeposit = ConstU64<1>;
     type AccountStore = System;
     type WeightInfo = ();
@@ -85,9 +85,9 @@ parameter_types! {
 }
 
 impl pallet_artists::Config for Test {
-    type Event = Event;
-    type Origin = Origin;
-    type Call = Call;
+    type RuntimeEvent = RuntimeEvent;
+    type Origin = RuntimeOrigin;
+    type Call = RuntimeCall;
     type Currency = Balances;
     type AdminOrigin = EnsureRoot<Self::AccountId>;
     type CreationDepositAmount = CreationDepositAmount;
@@ -110,7 +110,7 @@ impl SortedMembers<u64> for ArtistMock {
 }
 
 impl pallet_artist_identity::Config for Test {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type Currency = Balances;
     type StylesProvider = MusicStyles;
     type MaxDefaultStringLength = MaxDefaultStringLength;
@@ -130,7 +130,7 @@ parameter_types! {
 }
 
 impl pallet_music_styles::Config for Test {
-    type Event = Event;
+    type RuntimeEvent = RuntimeEvent;
     type AdminOrigin = EnsureRoot<Self::AccountId>;
     type Weights = ();
 }

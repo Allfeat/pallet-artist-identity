@@ -37,7 +37,7 @@ pub mod pallet {
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
-        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// Used to pay the data stored.
         type Currency: ReservableCurrency<Self::AccountId>;
@@ -46,7 +46,7 @@ pub mod pallet {
 
         /// The Origin emitted by an Artist call.
         type ArtistOrigin: EnsureOrigin<
-            <Self as frame_system::Config>::Origin,
+            <Self as frame_system::Config>::RuntimeOrigin,
             Success = Self::AccountId,
         >;
 
@@ -118,54 +118,63 @@ pub mod pallet {
     // Dispatchable functions must be annotated with a weight and must return a DispatchResult.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
+        #[pallet::call_index(0)]
         #[pallet::weight(<T as Config>::Weights::update_alias(T::MaxDefaultStringLength::get()))]
         pub fn update_alias(origin: OriginFor<T>, alias: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Alias, alias)?;
             Ok(())
         }
 
+        #[pallet::call_index(1)]
         #[pallet::weight(<T as Config>::Weights::update_bio(T::MaxDescriptionLength::get()))]
         pub fn update_bio(origin: OriginFor<T>, bio: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Bio, bio)?;
             Ok(())
         }
 
+        #[pallet::call_index(2)]
         #[pallet::weight(<T as Config>::Weights::update_profile_picture(T::MaxDefaultStringLength::get()))]
         pub fn update_profile_picture(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::ProfilePic, url)?;
             Ok(())
         }
 
+        #[pallet::call_index(3)]
         #[pallet::weight(<T as Config>::Weights::update_twitter(T::MaxDefaultStringLength::get()))]
         pub fn update_twitter(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Twitter, username)?;
             Ok(())
         }
 
+        #[pallet::call_index(4)]
         #[pallet::weight(<T as Config>::Weights::update_facebook(T::MaxDefaultStringLength::get()))]
         pub fn update_facebook(origin: OriginFor<T>, url: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Facebook, url)?;
             Ok(())
         }
 
+        #[pallet::call_index(5)]
         #[pallet::weight(<T as Config>::Weights::update_instagram(T::MaxDefaultStringLength::get()))]
         pub fn update_instagram(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Instagram, username)?;
             Ok(())
         }
 
+        #[pallet::call_index(6)]
         #[pallet::weight(<T as Config>::Weights::update_spotify(T::MaxDefaultStringLength::get()))]
         pub fn update_spotify(origin: OriginFor<T>, artist_id: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::Spotify, artist_id)?;
             Ok(())
         }
 
+        #[pallet::call_index(7)]
         #[pallet::weight(<T as Config>::Weights::update_apple_music(T::MaxDefaultStringLength::get()))]
         pub fn update_apple_music(origin: OriginFor<T>, username: Vec<u8>) -> DispatchResult {
             Self::update_field(origin, FieldName::AppleMusic, username)?;
             Ok(())
         }
 
+        #[pallet::call_index(8)]
         #[pallet::weight(<T as Config>::Weights::update_music_styles(
             T::MaxDefaultStringLength::get(),
             <MaxNameLength as Get<u32>>::get()
