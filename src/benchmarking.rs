@@ -18,7 +18,7 @@ fn assert_last_event<T: Config>(generic_event: <T as Config>::RuntimeEvent) {
 }
 
 fn setup_origin_and_data<T: Config>(data_length: usize) -> BenchmarkData<T> {
-    let origin = T::ArtistOrigin::successful_origin();
+    let origin = T::ArtistOrigin::try_successful_origin().unwrap();
     let account_id = T::ArtistOrigin::ensure_origin(origin.clone()).unwrap();
     whitelist_account!(account_id);
     T::Currency::make_free_balance_be(&account_id, BalanceOf::<T>::max_value());
@@ -157,7 +157,7 @@ benchmarks! {
             T::StylesHelper::add_parent_style(style.clone().try_into().unwrap())?;
         }
 
-        let origin = T::ArtistOrigin::successful_origin();
+        let origin = T::ArtistOrigin::try_successful_origin().unwrap();
         let account_id = T::ArtistOrigin::ensure_origin(origin.clone()).unwrap();
         whitelist_account!(account_id);
         T::Currency::make_free_balance_be(&account_id, BalanceOf::<T>::max_value());
