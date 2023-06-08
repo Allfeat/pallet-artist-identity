@@ -1,10 +1,12 @@
+use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::parameter_types;
 use frame_support::traits::{ConstU16, ConstU64, SortedMembers};
 use frame_system as system;
 use frame_system::EnsureSignedBy;
 use pallet_artists;
 use pallet_balances;
-use sp_core::H256;
+use scale_info::TypeInfo;
+use sp_core::{ConstU32, RuntimeDebug, H256};
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
@@ -18,6 +20,25 @@ use crate::{
     self as pallet_artist_identity,
     mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::GenesisBuild,
 };
+
+#[derive(
+    Encode,
+    Decode,
+    Copy,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    MaxEncodedLen,
+    TypeInfo,
+    RuntimeDebug,
+)]
+pub enum TestId {
+    Foo,
+    Bar,
+    Baz,
+}
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -74,6 +95,10 @@ impl pallet_balances::Config for Test {
     type MaxLocks = ();
     type MaxReserves = ();
     type ReserveIdentifier = [u8; 8];
+    type HoldIdentifier = TestId;
+    type FreezeIdentifier = TestId;
+    type MaxFreezes = ConstU32<2>;
+    type MaxHolds = ConstU32<2>;
 }
 
 parameter_types! {
