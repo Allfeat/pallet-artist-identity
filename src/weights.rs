@@ -43,180 +43,52 @@ pub trait WeightInfo {
     fn update_music_styles(_n: u32, _x: u32) -> Weight;
 }
 
-/// Weight functions for `pallet_artist_identity`.
-pub struct AllfeatWeightInfo<T>(PhantomData<T>);
-impl<T: frame_system::Config> WeightInfo for AllfeatWeightInfo<T> {
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_alias(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_379_000 as u64)
-            // Standard Error: 2_000
-            .saturating_add(Weight::from_ref_time(13_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 512]`.
-    fn update_bio(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_312_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(2_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_profile_picture(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_101_000 as u64)
-            // Standard Error: 1_000
-            .saturating_add(Weight::from_ref_time(9_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_twitter(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_189_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(7_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_facebook(n: u32, ) -> Weight {
-        Weight::from_ref_time(20_929_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(8_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_instagram(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_044_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(6_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_spotify(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_059_000 as u64)
-            // Standard Error: 1_000
-            .saturating_add(Weight::from_ref_time(9_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    /// The range of component `n` is `[0, 128]`.
-    fn update_apple_music(n: u32, ) -> Weight {
-        Weight::from_ref_time(20_927_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(7_000 as u64).saturating_mul(n as u64))
-            .saturating_add(T::DbWeight::get().reads(1 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-    // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
-    // Storage: MusicStyles Styles (r:1 w:0)
-    /// The range of component `n` is `[1, 5]`.
-    /// The range of component `x` is `[1, 64]`.
-    fn update_music_styles(n: u32, x: u32, ) -> Weight {
-        Weight::from_ref_time(23_484_000 as u64)
-            // Standard Error: 66_000
-            .saturating_add(Weight::from_ref_time(711_000 as u64).saturating_mul(n as u64))
-            // Standard Error: 2_000
-            .saturating_add(Weight::from_ref_time(22_000 as u64).saturating_mul(x as u64))
-            .saturating_add(T::DbWeight::get().reads(2 as u64))
-            .saturating_add(T::DbWeight::get().writes(1 as u64))
-    }
-}
-
 impl WeightInfo for () {
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_alias(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_379_000 as u64)
-            // Standard Error: 2_000
-            .saturating_add(Weight::from_ref_time(13_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 512]`.
     fn update_bio(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_312_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(2_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_profile_picture(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_101_000 as u64)
-            // Standard Error: 1_000
-            .saturating_add(Weight::from_ref_time(9_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_twitter(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_189_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(7_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_facebook(n: u32, ) -> Weight {
-        Weight::from_ref_time(20_929_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(8_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_instagram(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_044_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(6_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_spotify(n: u32, ) -> Weight {
-        Weight::from_ref_time(21_059_000 as u64)
-            // Standard Error: 1_000
-            .saturating_add(Weight::from_ref_time(9_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     /// The range of component `n` is `[0, 128]`.
     fn update_apple_music(n: u32, ) -> Weight {
-        Weight::from_ref_time(20_927_000 as u64)
-            // Standard Error: 0
-            .saturating_add(Weight::from_ref_time(7_000 as u64).saturating_mul(n as u64))
-            .saturating_add(RocksDbWeight::get().reads(1 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
     // Storage: ArtistIdentity ArtistMetadata (r:1 w:1)
     // Storage: MusicStyles Styles (r:1 w:0)
     /// The range of component `n` is `[1, 5]`.
     /// The range of component `x` is `[1, 64]`.
     fn update_music_styles(n: u32, x: u32, ) -> Weight {
-        Weight::from_ref_time(23_484_000 as u64)
-            // Standard Error: 66_000
-            .saturating_add(Weight::from_ref_time(711_000 as u64).saturating_mul(n as u64))
-            // Standard Error: 2_000
-            .saturating_add(Weight::from_ref_time(22_000 as u64).saturating_mul(x as u64))
-            .saturating_add(RocksDbWeight::get().reads(2 as u64))
-            .saturating_add(RocksDbWeight::get().writes(1 as u64))
+        Weight::default()
     }
 }

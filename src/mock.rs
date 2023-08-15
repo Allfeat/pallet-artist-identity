@@ -1,6 +1,6 @@
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::parameter_types;
-use frame_support::traits::{ConstU16, ConstU64, SortedMembers};
+use frame_support::traits::{ConstU64, SortedMembers};
 use frame_system as system;
 use frame_system::EnsureSignedBy;
 use pallet_artists;
@@ -8,18 +8,15 @@ use pallet_balances;
 use scale_info::TypeInfo;
 use sp_core::{ConstU32, RuntimeDebug, H256};
 use sp_runtime::{
-    testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
+    BuildStorage,
 };
 use system::EnsureRoot;
 
 use mock_artists::*;
 
 /// This mocking is adapted to the environnement of the Allfeat chain.
-use crate::{
-    self as pallet_artist_identity,
-    mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::GenesisBuild,
-};
+use crate::{self as pallet_artist_identity};
 
 #[derive(
     Encode,
@@ -40,15 +37,11 @@ pub enum TestId {
     Baz,
 }
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
-    pub enum Test where
-        Block = Block,
-        NodeBlock = Block,
-        UncheckedExtrinsic = UncheckedExtrinsic,
+    pub enum Test
     {
         System: frame_system,
         ArtistIdentity: pallet_artist_identity,
@@ -64,14 +57,13 @@ impl system::Config for Test {
     type BlockLength = ();
     type DbWeight = ();
     type RuntimeOrigin = RuntimeOrigin;
+    type Nonce = u64;
     type RuntimeCall = RuntimeCall;
-    type Index = u64;
-    type BlockNumber = u64;
     type Hash = H256;
     type Hashing = BlakeTwo256;
     type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
+    type Block = Block;
     type RuntimeEvent = RuntimeEvent;
     type BlockHashCount = ConstU64<250>;
     type Version = ();
@@ -80,25 +72,25 @@ impl system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type SystemWeightInfo = ();
-    type SS58Prefix = ConstU16<42>;
+    type SS58Prefix = ();
     type OnSetCode = ();
-    type MaxConsumers = frame_support::traits::ConstU32<16>;
+    type MaxConsumers = ConstU32<16>;
 }
 
 impl pallet_balances::Config for Test {
-    type Balance = u64;
-    type DustRemoval = ();
-    type RuntimeEvent = RuntimeEvent;
-    type ExistentialDeposit = ConstU64<1>;
-    type AccountStore = System;
-    type WeightInfo = ();
     type MaxLocks = ();
     type MaxReserves = ();
     type ReserveIdentifier = [u8; 8];
-    type HoldIdentifier = TestId;
-    type FreezeIdentifier = TestId;
-    type MaxFreezes = ConstU32<2>;
-    type MaxHolds = ConstU32<2>;
+    type Balance = u64;
+    type RuntimeEvent = RuntimeEvent;
+    type DustRemoval = ();
+    type ExistentialDeposit = ConstU64<1>;
+    type AccountStore = System;
+    type WeightInfo = ();
+    type FreezeIdentifier = ();
+    type MaxFreezes = ();
+    type RuntimeHoldReason = ();
+    type MaxHolds = ();
 }
 
 parameter_types! {
@@ -162,8 +154,8 @@ impl pallet_music_styles::Config for Test {
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext(include_styles: bool) -> sp_io::TestExternalities {
-    let mut storage = system::GenesisConfig::default()
-        .build_storage::<Test>()
+    let mut storage = system::GenesisConfig::<Test>::default()
+        .build_storage()
         .unwrap();
 
     // Give 100000 tokens to the 5 first accounts

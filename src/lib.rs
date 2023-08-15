@@ -110,6 +110,7 @@ pub mod pallet {
         TooMuchStylesSpecified,
         /// The given style name is not an existant style.
         InexistantStyle,
+        StylesCapacity,
     }
 
     // Dispatchable functions allows users to interact with the pallet and invoke state changes.
