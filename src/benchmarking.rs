@@ -1,8 +1,8 @@
 //! Benchmarking setup for pallet-template
 
 use frame_benchmarking::{benchmarks, whitelist_account};
+use frame_support::traits::UnfilteredDispatchable;
 #[allow(unused)]
-use frame_support::dispatch::UnfilteredDispatchable;
 use sp_runtime::traits::Bounded;
 
 use super::*;
